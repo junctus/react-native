@@ -71,14 +71,14 @@ interface Defaults {
   threshold: number;
 }
 
-// Window geometry: the log pane opens off the right edge and the window grows to
-// match; collapsed, it's just the controls column (see NeoWindow.setContentWidth).
+// Window geometry: the log pane is always shown to the right of the controls, so
+// the window is always the full width. A minimum height keeps the log usefully
+// tall even when the controls column is short.
 const CONTROLS_W = 392;
 const PANE_MARGIN = 16;
-const LOG_PANE_DEFAULT_W = 420;
-// Collapsed = exactly the controls column, so its 16px inner padding is the only
-// gutter and stays symmetric left/right (no dead space on the right).
-const COLLAPSED_CONTENT_W = CONTROLS_W;
+const LOG_PANE_W = 420;
+const FULL_CONTENT_W = CONTROLS_W + LOG_PANE_W + PANE_MARGIN;
+const MIN_CONTENT_H = 520;
 
 interface LogLine {
   id: number;
@@ -106,18 +106,15 @@ export default function App(): React.JSX.Element {
   const [message, setMessage] = useState('no relay on this path can read me');
   const [hops, setHops] = useState(2);
   const [busy, setBusy] = useState<string | null>(null);
-  const [output, setOutput] = useState<string | null>(null);
   const [relayRunning, setRelayRunning] = useState(false);
   const [relayEnabled, setRelayEnabled] = useState(true);
   const [relayExit, setRelayExit] = useState(false);
   const [announceAddr, setAnnounceAddr] = useState('');
   const [relayError, setRelayError] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogLine[]>([]);
-  const [logOpen, setLogOpen] = useState(false);
   const [diagOpen, setDiagOpen] = useState(false);
   const [advOpen, setAdvOpen] = useState(false);
   const logScroll = useRef<ScrollView>(null);
-  const logWidth = useRef(LOG_PANE_DEFAULT_W);
   // A ref (not a module global) so the id counter survives Fast Refresh — a
   // reset while `logs` state persists would mint duplicate React keys.
   const nextLogId = useRef(1);
@@ -132,7 +129,11 @@ export default function App(): React.JSX.Element {
     if (navHeight.current > 0 && controlsHeight.current > 0) {
       // Round to whole points: a fractional content height puts text on
       // half-pixel boundaries on Retina, which renders blurry until a resize.
-      const h = Math.round(navHeight.current + controlsHeight.current);
+      // Never shorter than MIN_CONTENT_H so the always-visible log has room.
+      const h = Math.max(
+        MIN_CONTENT_H,
+        Math.round(navHeight.current + controlsHeight.current),
+      );
       const last = lastFitHeight.current;
       // Symmetric dead-band: ignore sub-4px changes in EITHER direction. RN
       // re-measures the ScrollView content a pixel or two off after each resize;
@@ -146,15 +147,6 @@ export default function App(): React.JSX.Element {
       NeoWindow.setContentHeight(h, false).catch(() => {});
     }
   }, []);
-
-  const toggleLog = useCallback(() => {
-    const next = !logOpen;
-    NeoWindow.setContentWidth(
-      next ? CONTROLS_W + logWidth.current + PANE_MARGIN : COLLAPSED_CONTENT_W,
-      true,
-    ).catch(() => {});
-    setLogOpen(next);
-  }, [logOpen]);
 
   const appendLog = useCallback((stream: string, line: string) => {
     // Compute the id once, outside the updater, so a double-invoked updater
@@ -170,7 +162,7 @@ export default function App(): React.JSX.Element {
 
   useEffect(() => {
     NeoWindow.setTitle('Junctus Neo').catch(() => {});
-    NeoWindow.setContentWidth(COLLAPSED_CONTENT_W, false).catch(() => {});
+    NeoWindow.setContentWidth(FULL_CONTENT_W, false).catch(() => {});
   }, []);
 
   // Prefill mirrors + witness keys from the core's baked-in defaults, so the app
@@ -362,15 +354,17 @@ export default function App(): React.JSX.Element {
     } catch (e: any) {
       appendLog('vpn', `disconnect failed: ${e?.message ?? e}`);
     }
-    if (relayRunning) {
-      try {
-        await NeoDaemon.stop();
+    // Always stop the relay too. stop() is idempotent, so this is robust even if
+    // our relayRunning state is stale (e.g. the relay was started in a prior run).
+    try {
+      const res = await NeoDaemon.stop();
+      if (res.stopped) {
         appendLog('app', 'relay stopped');
-      } catch (e: any) {
-        appendLog('app', `relay stop failed: ${e?.message ?? e}`);
       }
+    } catch (e: any) {
+      appendLog('app', `relay stop failed: ${e?.message ?? e}`);
     }
-  }, [appendLog, relayRunning]);
+  }, [appendLog]);
 
   // Menu-bar item (Start/Stop Tunnel). Keep refs to the latest handlers so the
   // one-time subscription always calls the current config.
@@ -405,28 +399,32 @@ export default function App(): React.JSX.Element {
   const runOneShot = useCallback(
     async (label: string, args: string[]) => {
       setBusy(label);
-      setOutput(null);
       // The bundled CLI has no baked-in witness keys, so pass ours along.
       try {
         const witnesses = await ensureWitnesses();
         args = [...args, ...witnesses.flatMap(w => ['--witness', w])];
       } catch (e: any) {
-        setOutput(`error: ${e?.message ?? e}`);
+        appendLog('stderr', `error: ${e?.message ?? e}`);
         setBusy(null);
         return;
       }
       appendLog('app', `$ neo ${args.join(' ')}`);
       try {
         const res = await NeoDaemon.exec(args, {timeoutMs: 60_000});
-        const body = [res.stdout, res.stderr].filter(Boolean).join('\n');
-        setOutput(
-          res.timedOut
-            ? `timed out\n${body}`
-            : body || `(no output, exit ${res.code})`,
-        );
+        // Stream the one-shot command's output into the live log.
+        for (const line of res.stdout.split('\n')) {
+          if (line.trim()) {
+            appendLog('stdout', line);
+          }
+        }
+        for (const line of res.stderr.split('\n')) {
+          if (line.trim()) {
+            appendLog('stderr', line);
+          }
+        }
         appendLog('app', `exit ${res.timedOut ? 'timeout' : res.code}`);
       } catch (e: any) {
-        setOutput(`error: ${e?.message ?? e}`);
+        appendLog('stderr', `error: ${e?.message ?? e}`);
       } finally {
         setBusy(null);
       }
@@ -619,79 +617,39 @@ export default function App(): React.JSX.Element {
             </View>
           </Card>
 
-          {output !== null && (
-            <Card no="»" title="result">
-              <ScrollView style={styles.outputScroll}>
-                <Text style={styles.outputText} selectable>
-                  {output}
-                </Text>
-              </ScrollView>
-            </Card>
-          )}
-
-          {/* log opener — opens the live-log pane off the right edge */}
-          <Pressable onPress={toggleLog} style={styles.logOpener}>
-            {({pressed}) => (
-              <View style={styles.logOpenerRow}>
-                <Text style={styles.cardNo}>04</Text>
-                <Text style={styles.cardTitle}>log</Text>
-                <View style={styles.flex} />
-                <Text style={[styles.paneArrow, pressed && styles.paneArrowOn]}>
-                  {logOpen ? '◂' : '▸'}
-                </Text>
-              </View>
-            )}
-          </Pressable>
         </ScrollView>
 
-        {/* right column: live log pane, shown only when opened */}
-        {logOpen && (
-          <View
-            style={styles.logPane}
-            onLayout={e => {
-              logWidth.current = Math.round(e.nativeEvent.layout.width);
-            }}>
-            <View style={styles.logHead}>
-              <Pressable onPress={toggleLog} hitSlop={6}>
-                {({pressed}) => (
-                  <Text
-                    style={[
-                      styles.paneArrow,
-                      styles.logHeadArrow,
-                      pressed && styles.paneArrowOn,
-                    ]}>
-                    ◂
-                  </Text>
-                )}
-              </Pressable>
-              <Text style={styles.cardTitle}>log</Text>
-              <View style={styles.flex} />
-              <Pressable onPress={() => setLogs([])} hitSlop={6}>
-                {({pressed}) => (
-                  <Text style={[styles.clear, pressed && styles.clearOn]}>
-                    clear
-                  </Text>
-                )}
-              </Pressable>
-            </View>
-            <ScrollView ref={logScroll} style={styles.logScroll}>
-              {logs.length === 0 ? (
-                <Text style={styles.hint}>
-                  events and daemon output stream here
+        {/* right column: live log pane, always visible */}
+        <View style={styles.logPane}>
+          <View style={styles.logHead}>
+            <Text style={styles.cardNo}>04</Text>
+            <Text style={styles.cardTitle}>log</Text>
+            <View style={styles.flex} />
+            <Pressable onPress={() => setLogs([])} hitSlop={6}>
+              {({pressed}) => (
+                <Text style={[styles.clear, pressed && styles.clearOn]}>
+                  clear
                 </Text>
-              ) : (
-                logs.map(l => (
-                  <Text key={l.id} style={styles.logLine} selectable>
-                    <Text style={logTagStyle(l.stream)}>
-                      {l.stream.padEnd(7)}
-                    </Text>
-                    {l.line}
-                  </Text>
-                ))
               )}
-            </ScrollView>
+            </Pressable>
           </View>
-        )}
+          <ScrollView ref={logScroll} style={styles.logScroll}>
+            {logs.length === 0 ? (
+              <Text style={styles.hint}>
+                events and daemon output stream here
+              </Text>
+            ) : (
+              logs.map(l => (
+                <Text key={l.id} style={styles.logLine} selectable>
+                  <Text style={logTagStyle(l.stream)}>
+                    {l.stream.padEnd(7)}
+                  </Text>
+                  {l.line}
+                </Text>
+              ))
+            )}
+          </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -1082,9 +1040,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  outputScroll: {maxHeight: 200},
-  outputText: {color: C.txSoft, fontFamily: MONO, fontSize: 11.5, lineHeight: 17},
-
   // log pane
   logPane: {
     flex: 1,
@@ -1101,22 +1056,12 @@ const styles = StyleSheet.create({
   },
   logHead: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
     paddingBottom: 10,
     marginBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: C.ruleSoft,
   },
-  logHeadArrow: {marginRight: 10},
-
-  // log opener (under the controls; opens the pane on the right)
-  logOpener: {
-    backgroundColor: C.bgDeep,
-    borderWidth: 1,
-    borderColor: C.rule,
-    padding: 16,
-  },
-  logOpenerRow: {flexDirection: 'row', alignItems: 'baseline'},
   clear: {
     color: C.txFaint,
     fontFamily: MONO,
