@@ -75,7 +75,7 @@ class NeoVPN: RCTEventEmitter {
 
   /// Install/refresh the VPN profile and start it.
   /// config: { identityBase64, mirrors: [String], witnesses: [String],
-  ///           threshold?: Int, hops?: Int }
+  ///           threshold?: Int, privacy?: "off"|"balanced"|"paranoid" }
   @objc(connect:resolver:rejecter:)
   func connect(
     _ config: NSDictionary,
@@ -91,7 +91,7 @@ class NeoVPN: RCTEventEmitter {
       return
     }
     let threshold = (config["threshold"] as? Int) ?? witnesses.count
-    let hops = (config["hops"] as? Int) ?? 2
+    let privacy = (config["privacy"] as? String) ?? "balanced"
 
     // Ensure the packet-tunnel system extension is installed and approved, then
     // configure the VPN. First-time activation may need user approval in System
@@ -114,7 +114,7 @@ class NeoVPN: RCTEventEmitter {
       case .success:
         self.configureAndStart(
           identity: identity, mirrors: mirrors, witnesses: witnesses,
-          threshold: threshold, hops: hops, resolve: resolve, reject: reject)
+          threshold: threshold, privacy: privacy, resolve: resolve, reject: reject)
       }
     }
   }
@@ -133,7 +133,7 @@ class NeoVPN: RCTEventEmitter {
   /// Configure `NETunnelProviderManager` for the neo tunnel and start it.
   private func configureAndStart(
     identity: String, mirrors: [String], witnesses: [String],
-    threshold: Int, hops: Int,
+    threshold: Int, privacy: String,
     resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock
   ) {
     loadManager { [weak self] mgr, error in
@@ -150,7 +150,7 @@ class NeoVPN: RCTEventEmitter {
         "mirrors": mirrors,
         "witnesses": witnesses,
         "threshold": threshold,
-        "hops": hops,
+        "privacy": privacy,
       ]
 
       mgr.localizedDescription = "neo"

@@ -74,11 +74,63 @@ interface Defaults {
 // Window geometry: the log pane is always shown to the right of the controls, so
 // the window is always the full width. A minimum height keeps the log usefully
 // tall even when the controls column is short.
-const CONTROLS_W = 392;
+const CONTROLS_W = 432;
 const PANE_MARGIN = 16;
 const LOG_PANE_W = 420;
 const FULL_CONTENT_W = CONTROLS_W + LOG_PANE_W + PANE_MARGIN;
 const MIN_CONTENT_H = 520;
+
+// The core's privacy dial (neo_core::PrivacyLevel / neo_mix::MixParams::for_level).
+// Each level sets the circuit length and the mixing/cover posture; the app drives
+// the hop count today (deeper timing-mix + cover wiring in the multi-hop stack is
+// the next core step). Mirrors the levels described on junctus.org.
+type PrivacyLevel = 'off' | 'balanced' | 'paranoid';
+
+interface LevelSpec {
+  key: PrivacyLevel;
+  name: string;
+  hops: number;
+  timing: string;
+  cover: string;
+  latency: number; // 0..1, for the latency-cost bar
+  isDefault?: boolean;
+  blurb: string;
+}
+
+const LEVELS: LevelSpec[] = [
+  {
+    key: 'off',
+    name: 'Low',
+    hops: 1,
+    timing: 'none',
+    cover: 'none',
+    latency: 0.12,
+    blurb: 'Lowest overhead — a single hop, no cover or mixing. Fast, minimal anonymity.',
+  },
+  {
+    key: 'balanced',
+    name: 'Balanced',
+    hops: 3,
+    timing: 'moderate per-hop',
+    cover: 'periodic',
+    latency: 0.5,
+    isDefault: true,
+    blurb: 'A sane default: a 3-hop circuit with moderate mixing and cover.',
+  },
+  {
+    key: 'paranoid',
+    name: 'Paranoid',
+    hops: 5,
+    timing: 'deep per-hop',
+    cover: 'heavy, near constant-rate',
+    latency: 0.92,
+    blurb: 'Maximum anonymity: heavy cover traffic, deep mixing, committee exits.',
+  },
+];
+
+const TRILEMMA =
+  'The anonymity trilemma: strong anonymity, low latency, low overhead — pick ' +
+  'two. The dial decides which two. There is no fourth option.';
 
 interface LogLine {
   id: number;
@@ -102,7 +154,7 @@ export default function App(): React.JSX.Element {
   const [vpnError, setVpnError] = useState<string | null>(null);
   const [mirrorsRaw, setMirrorsRaw] = useState(DEFAULT_MIRROR);
   const [witnessesRaw, setWitnessesRaw] = useState('');
-  const [vpnHops, setVpnHops] = useState(2);
+  const [privacy, setPrivacy] = useState<PrivacyLevel>('balanced');
   const [message, setMessage] = useState('no relay on this path can read me');
   const [hops, setHops] = useState(2);
   const [busy, setBusy] = useState<string | null>(null);
@@ -319,13 +371,14 @@ export default function App(): React.JSX.Element {
     }
     try {
       const secret = await NeoCore.identitySecretBase64();
-      appendLog('vpn', `connecting — all traffic via ${vpnHops}-hop circuits`);
+      const levelName = LEVELS.find(l => l.key === privacy)?.name ?? privacy;
+      appendLog('vpn', `connecting — ${levelName} privacy, all traffic tunneled`);
       await NeoVPN.connect({
         identityBase64: secret,
         mirrors: vpnMirrors,
         witnesses,
         threshold: witnesses.length,
-        hops: vpnHops,
+        privacy,
       });
     } catch (e: any) {
       const msg = String(e?.message ?? e);
@@ -342,10 +395,10 @@ export default function App(): React.JSX.Element {
     appendLog,
     ensureWitnesses,
     mirrorsRaw,
+    privacy,
     relayEnabled,
     relayExit,
     relayRunning,
-    vpnHops,
   ]);
 
   const disconnectVpn = useCallback(async () => {
@@ -491,6 +544,12 @@ export default function App(): React.JSX.Element {
           </Card>
 
           <Card no="02" title="route all traffic">
+            <PrivacyDial
+              value={privacy}
+              onChange={setPrivacy}
+              disabled={vpnConnected || vpnBusy}
+            />
+            <View style={styles.gap} />
             <View style={styles.rowBetween}>
               <Check
                 label="relay node"
@@ -508,24 +567,19 @@ export default function App(): React.JSX.Element {
               />
             </View>
             <View style={styles.gap} />
-            <View style={styles.rowBetween}>
-              <View style={styles.rowCenter}>
-                <Label inline>hops</Label>
-                <Stepper value={vpnHops} min={1} max={5} onChange={setVpnHops} />
-              </View>
-              <Button
-                label={
-                  vpnConnected
-                    ? 'disconnect'
-                    : vpnBusy
-                    ? vpnStatus
-                    : 'start tunnel'
-                }
-                kind={vpnConnected ? 'danger' : 'solid'}
-                disabled={vpnBusy}
-                onPress={vpnConnected ? disconnectVpn : connectVpn}
-              />
-            </View>
+            <Button
+              wide
+              label={
+                vpnConnected
+                  ? 'disconnect'
+                  : vpnBusy
+                  ? vpnStatus
+                  : 'start tunnel'
+              }
+              kind={vpnConnected ? 'danger' : 'solid'}
+              disabled={vpnBusy}
+              onPress={vpnConnected ? disconnectVpn : connectVpn}
+            />
             {relayRunning && (
               <Text style={[styles.relayState, styles.relayStateOn]}>
                 ● relaying{relayExit ? ' + exit' : ''}
@@ -779,18 +833,21 @@ function Button({
   onPress,
   disabled,
   kind = 'ghost',
+  wide,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   kind?: 'ghost' | 'solid' | 'danger';
+  wide?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} disabled={disabled}>
+    <Pressable onPress={onPress} disabled={disabled} style={wide && styles.flex}>
       {({pressed}) => (
         <View
           style={[
             styles.btn,
+            wide && styles.btnWide,
             kind === 'solid' && styles.btnSolid,
             kind === 'danger' && styles.btnDanger,
             pressed && kind === 'ghost' && styles.btnGhostOn,
@@ -807,6 +864,79 @@ function Button({
         </View>
       )}
     </Pressable>
+  );
+}
+
+function PrivacyDial({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: PrivacyLevel;
+  onChange: (v: PrivacyLevel) => void;
+  disabled?: boolean;
+}) {
+  const spec = LEVELS.find(l => l.key === value) ?? LEVELS[1];
+  return (
+    <View>
+      <Text style={styles.dialLabel}>config · privacy_level</Text>
+      <View style={styles.dialOpts}>
+        {LEVELS.map((l, i) => (
+          <Pressable
+            key={l.key}
+            style={styles.flex}
+            onPress={() => onChange(l.key)}
+            disabled={disabled}>
+            {({pressed}) => (
+              <View
+                style={[
+                  styles.dialOpt,
+                  i > 0 && styles.dialOptDivided,
+                  value === l.key && styles.dialOptOn,
+                  pressed && value !== l.key && styles.dialOptHover,
+                ]}>
+                <Text
+                  style={[
+                    styles.dialOptName,
+                    value === l.key && styles.dialOptNameOn,
+                  ]}>
+                  {l.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.dialOptTag,
+                    value === l.key && styles.dialOptTagOn,
+                  ]}>
+                  {l.isDefault ? 'default' : ' '}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        ))}
+      </View>
+      <Text style={styles.dialTrilemma}>{TRILEMMA}</Text>
+      <Text style={styles.dialBlurb}>{spec.blurb}</Text>
+      <View style={styles.dialSpecs}>
+        <SpecRow k="timing mixing" v={spec.timing} />
+        <SpecRow k="cover traffic" v={spec.cover} />
+        <SpecRow k="route" v={`${spec.hops}-hop circuit`} />
+        <View style={styles.specRow}>
+          <Text style={styles.specKey}>latency cost</Text>
+          <View style={styles.meterTrack}>
+            <View style={[styles.meterFill, {width: `${spec.latency * 100}%`}]} />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function SpecRow({k, v}: {k: string; v: string}) {
+  return (
+    <View style={styles.specRow}>
+      <Text style={styles.specKey}>{k}</Text>
+      <Text style={styles.specVal}>{v}</Text>
+    </View>
   );
 }
 
@@ -995,6 +1125,95 @@ const styles = StyleSheet.create({
   },
   relayStateOn: {color: C.accent},
 
+  // privacy dial
+  dialLabel: {
+    color: C.txFaint,
+    fontFamily: MONO,
+    fontSize: 10.5,
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  dialOpts: {flexDirection: 'row', borderWidth: 1, borderColor: C.rule},
+  dialOpt: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+  },
+  dialOptDivided: {borderLeftWidth: 1, borderLeftColor: C.rule},
+  dialOptOn: {backgroundColor: C.accent},
+  dialOptHover: {backgroundColor: C.bgRaise},
+  dialOptName: {
+    color: C.txSoft,
+    fontFamily: MONO,
+    fontSize: 12,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  dialOptNameOn: {color: C.onAccent},
+  dialOptTag: {
+    color: C.txFaint,
+    fontFamily: MONO,
+    fontSize: 9,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginTop: 4,
+  },
+  dialOptTagOn: {color: C.onAccent, opacity: 0.65},
+  dialTrilemma: {
+    color: C.txSoft,
+    fontFamily: BODY,
+    fontStyle: 'italic',
+    fontSize: 12.5,
+    lineHeight: 18,
+    borderLeftWidth: 2,
+    borderLeftColor: C.accent,
+    paddingLeft: 10,
+    marginTop: 12,
+  },
+  dialBlurb: {
+    color: C.txFaint,
+    fontFamily: MONO,
+    fontSize: 10.5,
+    lineHeight: 15,
+    marginTop: 10,
+  },
+  dialSpecs: {marginTop: 12, borderTopWidth: 1, borderTopColor: C.ruleSoft},
+  specRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: C.ruleSoft,
+  },
+  specKey: {
+    color: C.txFaint,
+    fontFamily: MONO,
+    fontSize: 9.5,
+    letterSpacing: 1.3,
+    textTransform: 'uppercase',
+    width: 108,
+  },
+  specVal: {flex: 1, color: C.tx, fontFamily: MONO, fontSize: 11.5},
+  meterTrack: {
+    flex: 1,
+    height: 6,
+    borderWidth: 1,
+    borderColor: C.rule,
+    justifyContent: 'center',
+  },
+  meterFill: {
+    height: 4,
+    marginLeft: 1,
+    backgroundColor: C.accent,
+    shadowColor: C.accent,
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    shadowOffset: {width: 0, height: 0},
+  },
+
   // buttons
   btn: {
     borderWidth: 1,
@@ -1003,6 +1222,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     alignItems: 'center',
   },
+  btnWide: {alignSelf: 'stretch'},
   btnSolid: {backgroundColor: C.accent, borderColor: C.accent},
   btnDanger: {borderColor: C.danger},
   btnGhostOn: {borderColor: C.accent},

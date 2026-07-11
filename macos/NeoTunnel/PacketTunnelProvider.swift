@@ -35,7 +35,13 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
       return
     }
     let threshold = UInt32((conf["threshold"] as? Int) ?? witnesses.count)
-    let hops = UInt32((conf["hops"] as? Int) ?? 2)
+    // The privacy dial sets both the mixing posture and the circuit length.
+    let privacy: NeoPrivacy
+    switch conf["privacy"] as? String {
+    case "off": privacy = .off
+    case "paranoid": privacy = .paranoid
+    default: privacy = .balanced
+    }
 
     // Discover relays (a witness-verified snapshot) and start the multi-hop
     // stack before we claim the route, so a failure surfaces as a failed
@@ -51,11 +57,12 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
         mirrors: mirrors,
         witnesses: witnesses,
         threshold: threshold,
-        hops: hops,
+        privacy: privacy,
         netInterfaceIndex: ifIndex
       )
       session = started
-      log.info("multi-hop tunnel up: \(started.relayCount()) relays, \(hops)-hop circuits, scoped to if#\(ifIndex)")
+      log.info(
+        "multi-hop tunnel up: \(started.relayCount()) relays, \(String(describing: privacy)) privacy, scoped to if#\(ifIndex)")
     } catch {
       log.error("tunnelStackConnect failed: \(error.localizedDescription, privacy: .public)")
       completionHandler(error)

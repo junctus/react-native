@@ -18,8 +18,8 @@ export interface VPNConnectConfig {
   witnesses: string[];
   /** Required distinct witness signatures (defaults to witnesses.length). */
   threshold?: number;
-  /** Relays per circuit; the last is the exit (defaults to 2). */
-  hops?: number;
+  /** Privacy dial: sets the mixing posture and circuit length (default balanced). */
+  privacy?: 'off' | 'balanced' | 'paranoid';
 }
 
 interface NeoVPNModule {

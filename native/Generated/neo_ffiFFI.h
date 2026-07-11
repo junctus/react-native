@@ -329,7 +329,7 @@ void*_Nonnull uniffi_neo_ffi_fn_func_tunnel_connect(RustBuffer secret, RustBuffe
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_FUNC_TUNNEL_STACK_CONNECT
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_FUNC_TUNNEL_STACK_CONNECT
-void*_Nonnull uniffi_neo_ffi_fn_func_tunnel_stack_connect(RustBuffer secret, RustBuffer mirrors, RustBuffer witnesses, uint32_t threshold, uint32_t hops, uint32_t net_interface_index, RustCallStatus *_Nonnull out_status
+void*_Nonnull uniffi_neo_ffi_fn_func_tunnel_stack_connect(RustBuffer secret, RustBuffer mirrors, RustBuffer witnesses, uint32_t threshold, RustBuffer privacy, uint32_t net_interface_index, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_NEO_FFI_RUSTBUFFER_ALLOC
