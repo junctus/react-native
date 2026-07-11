@@ -41,15 +41,21 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
     // stack before we claim the route, so a failure surfaces as a failed
     // connection. Each intercepted flow gets its own fresh onion circuit.
     do {
+      // Pin the stack's circuit sockets to the physical interface so that
+      // per-flow relay connections opened after we claim the default route
+      // bypass our own tunnel instead of looping back into it. Resolved here,
+      // before setTunnelNetworkSettings, while the real default route is still up.
+      let ifIndex = physicalInterfaceIndex()
       let started = try tunnelStackConnect(
         secret: secret,
         mirrors: mirrors,
         witnesses: witnesses,
         threshold: threshold,
-        hops: hops
+        hops: hops,
+        netInterfaceIndex: ifIndex
       )
       session = started
-      log.info("multi-hop tunnel up: \(started.relayCount()) relays, \(hops)-hop circuits")
+      log.info("multi-hop tunnel up: \(started.relayCount()) relays, \(hops)-hop circuits, scoped to if#\(ifIndex)")
     } catch {
       log.error("tunnelStackConnect failed: \(error.localizedDescription, privacy: .public)")
       completionHandler(error)
@@ -91,6 +97,45 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
     session?.close()
     session = nil
     completionHandler()
+  }
+
+  /// The physical interface (en0, …) carrying the real default route, resolved to
+  /// its index so the neo stack can pin its circuit sockets there and bypass our
+  /// own tunnel. 0 (unscoped) if none is found.
+  private func physicalInterfaceIndex() -> UInt32 {
+    guard let name = primaryPhysicalInterface() else { return 0 }
+    return name.withCString { if_nametoindex($0) }
+  }
+
+  /// The up, running, non-virtual IPv4 interface most likely to be the default
+  /// route (prefer en0, then any en*, then any candidate). Mirrors the relay's
+  /// interface pick in NeoDaemon so the client and relay scope to the same NIC.
+  private func primaryPhysicalInterface() -> String? {
+    var addrsPtr: UnsafeMutablePointer<ifaddrs>?
+    guard getifaddrs(&addrsPtr) == 0 else { return nil }
+    defer { freeifaddrs(addrsPtr) }
+
+    let excluded = ["utun", "ppp", "ipsec", "awdl", "llw", "bridge", "gif", "stf", "tap", "tun"]
+    var candidates: [String] = []
+    var ptr = addrsPtr
+    while let cur = ptr {
+      let flags = Int32(cur.pointee.ifa_flags)
+      let name = String(cString: cur.pointee.ifa_name)
+      if let sa = cur.pointee.ifa_addr,
+        sa.pointee.sa_family == UInt8(AF_INET),
+        flags & IFF_UP != 0,
+        flags & IFF_RUNNING != 0,
+        flags & IFF_LOOPBACK == 0,
+        !excluded.contains(where: { name.hasPrefix($0) }),
+        !candidates.contains(name)
+      {
+        candidates.append(name)
+      }
+      ptr = cur.pointee.ifa_next
+    }
+    return candidates.first(where: { $0 == "en0" })
+      ?? candidates.first(where: { $0.hasPrefix("en") })
+      ?? candidates.first
   }
 
   /// Outbound: OS TUN → neo. Recurses to keep reading as long as we're up.

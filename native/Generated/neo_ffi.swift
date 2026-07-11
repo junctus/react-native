@@ -1159,14 +1159,15 @@ public func tunnelConnect(secret: Data, peerAddr: String, privacy: NeoPrivacy)th
  * trusted witness keys; `threshold` is how many must sign the snapshot; `hops`
  * is the relays per circuit (last is the exit).
  */
-public func tunnelStackConnect(secret: Data, mirrors: [String], witnesses: [String], threshold: UInt32, hops: UInt32)throws  -> NeoTunnelStackSession  {
+public func tunnelStackConnect(secret: Data, mirrors: [String], witnesses: [String], threshold: UInt32, hops: UInt32, netInterfaceIndex: UInt32)throws  -> NeoTunnelStackSession  {
     return try  FfiConverterTypeNeoTunnelStackSession_lift(try rustCallWithError(FfiConverterTypeNeoTunnelError_lift) {
     uniffi_neo_ffi_fn_func_tunnel_stack_connect(
         FfiConverterData.lower(secret),
         FfiConverterSequenceString.lower(mirrors),
         FfiConverterSequenceString.lower(witnesses),
         FfiConverterUInt32.lower(threshold),
-        FfiConverterUInt32.lower(hops),$0
+        FfiConverterUInt32.lower(hops),
+        FfiConverterUInt32.lower(netInterfaceIndex),$0
     )
 })
 }
@@ -1195,7 +1196,7 @@ private let initializationResult: InitializationResult = {
     if (uniffi_neo_ffi_checksum_func_tunnel_connect() != 31319) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_neo_ffi_checksum_func_tunnel_stack_connect() != 2969) {
+    if (uniffi_neo_ffi_checksum_func_tunnel_stack_connect() != 37611) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_neo_ffi_checksum_method_neotunnelsession_close() != 2975) {

@@ -1,11 +1,22 @@
+import AppKit
 import Foundation
 import NetworkExtension
 import React
+import SystemExtensions
+
+/// The NeoTunnel packet-tunnel provider's bundle id — the system extension the
+/// app installs, and the provider `NETunnelProviderManager` configures.
+private let tunnelBundleId = "org.reactjs.native.NeoMac.NeoTunnel"
 
 /// Installs and controls the neo system VPN (the NeoTunnel packet-tunnel
 /// provider) via `NETunnelProviderManager`. Once connected, the OS routes ALL
 /// of the Mac's traffic into the extension, which carries it to a peer exit node
 /// through the neo Rust core.
+///
+/// Because the tunnel ships as a **system extension** (required for Developer ID
+/// distribution outside the App Store), `connect` first activates that extension
+/// via `OSSystemExtensionManager` — which may need one-time user approval in
+/// System Settings — before configuring the VPN.
 ///
 /// Events:
 ///  - `neo-vpn-state` { status }  where status is one of
@@ -15,6 +26,9 @@ class NeoVPN: RCTEventEmitter {
   private var manager: NETunnelProviderManager?
   private var observer: NSObjectProtocol?
   private var hasListeners = false
+  /// Held between an `OSSystemExtensionRequest` submission and its delegate
+  /// callback, then invoked once with the activation outcome.
+  private var activationCompletion: ((Result<Void, Error>) -> Void)?
 
   override static func requiresMainQueueSetup() -> Bool { false }
   override func supportedEvents() -> [String]! { ["neo-vpn-state"] }
@@ -79,6 +93,49 @@ class NeoVPN: RCTEventEmitter {
     let threshold = (config["threshold"] as? Int) ?? witnesses.count
     let hops = (config["hops"] as? Int) ?? 2
 
+    // Ensure the packet-tunnel system extension is installed and approved, then
+    // configure the VPN. First-time activation may need user approval in System
+    // Settings; we surface that as a clear error and the user reconnects.
+    activateSystemExtension { [weak self] result in
+      guard let self else { return }
+      switch result {
+      case .failure(let error):
+        if case NeoSystemExtensionError.needsApproval = error {
+          reject(
+            "E_SYSEXT_APPROVAL",
+            "Approval needed: System Settings just opened at General \u{2192} Login "
+              + "Items & Extensions. Under \u{201C}NeoMac Extensions\u{201D}, turn ON "
+              + "the \u{201C}Network Extension\u{201D} toggle (unlock with your "
+              + "password), click Done, then press Start Tunnel again.",
+            nil)
+        } else {
+          reject("E_SYSEXT", "system extension activation failed: \(error.localizedDescription)", error)
+        }
+      case .success:
+        self.configureAndStart(
+          identity: identity, mirrors: mirrors, witnesses: witnesses,
+          threshold: threshold, hops: hops, resolve: resolve, reject: reject)
+      }
+    }
+  }
+
+  /// Submit an activation request for the tunnel system extension. Completes
+  /// with success once it's active, or `NeoSystemExtensionError.needsApproval`
+  /// when the user must first approve it in System Settings.
+  private func activateSystemExtension(_ completion: @escaping (Result<Void, Error>) -> Void) {
+    let request = OSSystemExtensionRequest.activationRequest(
+      forExtensionWithIdentifier: tunnelBundleId, queue: .main)
+    request.delegate = self
+    activationCompletion = completion
+    OSSystemExtensionManager.shared.submitRequest(request)
+  }
+
+  /// Configure `NETunnelProviderManager` for the neo tunnel and start it.
+  private func configureAndStart(
+    identity: String, mirrors: [String], witnesses: [String],
+    threshold: Int, hops: Int,
+    resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock
+  ) {
     loadManager { [weak self] mgr, error in
       guard let self else { return }
       if let error = error { reject("E_LOAD", error.localizedDescription, error); return }
@@ -86,7 +143,7 @@ class NeoVPN: RCTEventEmitter {
 
       let proto = NETunnelProviderProtocol()
       // Must match the extension's bundle identifier.
-      proto.providerBundleIdentifier = "org.reactjs.native.NeoMac.NeoTunnel"
+      proto.providerBundleIdentifier = tunnelBundleId
       proto.serverAddress = mirrors.first ?? "neo"
       proto.providerConfiguration = [
         "identity": identity,
@@ -152,5 +209,49 @@ class NeoVPN: RCTEventEmitter {
   override func invalidate() {
     if let observer = observer { NotificationCenter.default.removeObserver(observer) }
     super.invalidate()
+  }
+}
+
+/// Activation outcome that isn't a hard failure: the extension is staged but the
+/// user must approve it in System Settings before it can run.
+enum NeoSystemExtensionError: Error { case needsApproval }
+
+extension NeoVPN: OSSystemExtensionRequestDelegate {
+  func request(
+    _ request: OSSystemExtensionRequest,
+    actionForReplacingExtension existing: OSSystemExtensionProperties,
+    withExtension ext: OSSystemExtensionProperties
+  ) -> OSSystemExtensionRequest.ReplacementAction {
+    // Always install the version bundled in the app (handles upgrades).
+    .replace
+  }
+
+  func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
+    // Jump the user straight to the approval UI (System Settings › General ›
+    // Login Items & Extensions) instead of making them navigate there by hand.
+    DispatchQueue.main.async {
+      if let url = URL(
+        string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension") {
+        NSWorkspace.shared.open(url)
+      }
+    }
+    let completion = activationCompletion
+    activationCompletion = nil
+    completion?(.failure(NeoSystemExtensionError.needsApproval))
+  }
+
+  func request(
+    _ request: OSSystemExtensionRequest,
+    didFinishWithResult result: OSSystemExtensionRequest.Result
+  ) {
+    let completion = activationCompletion
+    activationCompletion = nil
+    completion?(.success(()))
+  }
+
+  func request(_ request: OSSystemExtensionRequest, didFailWithError error: Error) {
+    let completion = activationCompletion
+    activationCompletion = nil
+    completion?(.failure(error))
   }
 }

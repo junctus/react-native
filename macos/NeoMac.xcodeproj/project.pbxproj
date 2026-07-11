@@ -7,42 +7,43 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0B217FE7343A26E2038E2B47 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C461C9903D1F4EAE1EC922D /* PacketTunnelProvider.swift */; };
-		210A66A37B6F80D2FAA72F0B /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA1F21CC4402EA9A1E16CD6E /* NetworkExtension.framework */; };
+		1A1FA126D452C688B16F559D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BDDA359CB2EC3F56703C8E /* main.swift */; };
+		1EE3EA230EBFAAD1614C33D6 /* NeoTunnel.systemextension in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = 322E197D934B7B7F1EE3E0BA /* NeoTunnel.systemextension */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2236B0E6B9C6E04D34D626E8 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA1F21CC4402EA9A1E16CD6E /* NetworkExtension.framework */; };
+		318802973204DD1063B9AF9B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6587F29BC792FE4AA383E6B9 /* Cocoa.framework */; };
 		5142014D2437B4B30078DB4F /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5142014C2437B4B30078DB4F /* AppDelegate.mm */; };
 		514201522437B4B40078DB4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 514201512437B4B40078DB4F /* Assets.xcassets */; };
 		514201552437B4B40078DB4F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514201532437B4B40078DB4F /* Main.storyboard */; };
 		514201582437B4B40078DB4F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 514201572437B4B40078DB4F /* main.m */; };
 		7796A02F4F2A32B49A2200A6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1F225151085A85D456236C58 /* PrivacyInfo.xcprivacy */; };
 		8656CF277507D87AAEFC1B23 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 9E3DC6E8E1F452EE4423B22D /* Fonts */; };
-		96D4CF6259F88894E22ABBED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBD381FFDBC96C493265B019 /* Security.framework */; };
-		9E9469AE817AFE83247AE088 /* neo_ffi.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA23E67B42E7E44A3A3E815A /* neo_ffi.swift */; };
-		E47F3A9BE041E4ED72A02C1F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6587F29BC792FE4AA383E6B9 /* Cocoa.framework */; };
+		AC47069B794A7DC27E81EA18 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 384DDADEACFD553874B81A94 /* PacketTunnelProvider.swift */; };
+		C10F9A1F129D22BF071CA795 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBD381FFDBC96C493265B019 /* Security.framework */; };
+		C1CE107C1C441E4BF10A650C /* neo_ffi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314D72D953E438988DDB13D0 /* neo_ffi.swift */; };
 		E4ED8508D493F9D64AA35D97 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1F225151085A85D456236C58 /* PrivacyInfo.xcprivacy */; };
-		F625C9226190CF5E5EC3C3D8 /* NeoTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 20C5957F1877D3FDD7C8173F /* NeoTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F7D977B6A1CEEF6D627E2A70 /* libPods-NeoMac-macOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F7BAA4910252D3D1DC7D5788 /* libPods-NeoMac-macOS.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		72881F36DAD9621A3A8C2223 /* PBXContainerItemProxy */ = {
+		75405EEDC4B86B2AF67C9849 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 857344404E727156CA2ACD53;
+			remoteGlobalIDString = DA401E603993ECD9101B9DEB;
 			remoteInfo = NeoTunnel;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		BB887141A7EF441503065F3C /* Embed App Extensions */ = {
+		BB3598689A1EDC86493C5AFB /* Embed System Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstPath = Contents/Library/SystemExtensions;
+			dstSubfolderSpec = 1;
 			files = (
-				F625C9226190CF5E5EC3C3D8 /* NeoTunnel.appex in Embed App Extensions */,
+				1EE3EA230EBFAAD1614C33D6 /* NeoTunnel.systemextension in Embed System Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed System Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -51,7 +52,9 @@
 		13B07F961A680F5B00A75B9A /* NeoMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeoMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F225151085A85D456236C58 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		20C5957F1877D3FDD7C8173F /* NeoTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeoTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		2F85326AF69087F5E0CF9EA6 /* NeoTunnel.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NeoTunnel.entitlements; sourceTree = "<group>"; };
+		314D72D953E438988DDB13D0 /* neo_ffi.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = neo_ffi.swift; path = ../../native/Generated/neo_ffi.swift; sourceTree = "<group>"; };
+		322E197D934B7B7F1EE3E0BA /* NeoTunnel.systemextension */ = {isa = PBXFileReference; explicitFileType = "wrapper.system-extension"; includeInIndex = 0; path = "org.reactjs.native.NeoMac.NeoTunnel.systemextension"; sourceTree = BUILT_PRODUCTS_DIR; };
+		384DDADEACFD553874B81A94 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
 		477E3ACCFF657B8DFFF8674B /* Pods-NeoMac-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NeoMac-macOS.release.xcconfig"; path = "Target Support Files/Pods-NeoMac-macOS/Pods-NeoMac-macOS.release.xcconfig"; sourceTree = "<group>"; };
 		514201492437B4B30078DB4F /* NeoMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeoMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5142014B2437B4B30078DB4F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -61,19 +64,20 @@
 		514201562437B4B40078DB4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		514201572437B4B40078DB4F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		514201592437B4B40078DB4F /* NeoMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NeoMac.entitlements; sourceTree = "<group>"; };
-		5C461C9903D1F4EAE1EC922D /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
+		551972753CC348AEA75054BF /* NeoTunnel.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NeoTunnel.entitlements; sourceTree = "<group>"; };
 		5CBA40ACE4AAD0EB8E0E6207 /* NeoTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeoTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6587F29BC792FE4AA383E6B9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
-		7CB1E6284B3213FE588B6148 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		663A078E3002698800E3B6AA /* NeoMac-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "NeoMac-iOS.entitlements"; sourceTree = "<group>"; };
 		87127F85CB700E5C9D1F15FA /* NeoTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeoTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		98977C15FA1840511952BD45 /* libneo_ffi.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libneo_ffi.a; path = ../../native/Libs/libneo_ffi.a; sourceTree = "<group>"; };
 		9E3DC6E8E1F452EE4423B22D /* Fonts */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		A0DBEC7FAC237FD49DB5901D /* NeoTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeoTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1E20CDFDE1C021E8C155CB3 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B67B03B2AAC767B568CF67EE /* NeoTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeoTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		BA23E67B42E7E44A3A3E815A /* neo_ffi.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = neo_ffi.swift; path = ../../native/Generated/neo_ffi.swift; sourceTree = "<group>"; };
 		BBD381FFDBC96C493265B019 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		CA1F21CC4402EA9A1E16CD6E /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/NetworkExtension.framework; sourceTree = DEVELOPER_DIR; };
-		D772E0DA7F48F11613C25468 /* libneo_ffi.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libneo_ffi.a; path = ../../native/Libs/libneo_ffi.a; sourceTree = "<group>"; };
 		DEC4567E52EBE6A432E46270 /* Pods-NeoMac-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NeoMac-macOS.debug.xcconfig"; path = "Target Support Files/Pods-NeoMac-macOS/Pods-NeoMac-macOS.debug.xcconfig"; sourceTree = "<group>"; };
+		E5BDDA359CB2EC3F56703C8E /* main.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F7BAA4910252D3D1DC7D5788 /* libPods-NeoMac-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NeoMac-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -86,21 +90,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		236C00652C252ADD4AA85C00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				318802973204DD1063B9AF9B /* Cocoa.framework in Frameworks */,
+				2236B0E6B9C6E04D34D626E8 /* NetworkExtension.framework in Frameworks */,
+				C10F9A1F129D22BF071CA795 /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		514201462437B4B30078DB4F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				F7D977B6A1CEEF6D627E2A70 /* libPods-NeoMac-macOS.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B0B8FC64AF5195A6E35FAA7C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E47F3A9BE041E4ED72A02C1F /* Cocoa.framework in Frameworks */,
-				210A66A37B6F80D2FAA72F0B /* NetworkExtension.framework in Frameworks */,
-				96D4CF6259F88894E22ABBED /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,18 +136,6 @@
 			path = "NeoMac-macOS";
 			sourceTree = "<group>";
 		};
-		797FF8FD661973AF8F5A1301 /* NeoTunnel */ = {
-			isa = PBXGroup;
-			children = (
-				5C461C9903D1F4EAE1EC922D /* PacketTunnelProvider.swift */,
-				7CB1E6284B3213FE588B6148 /* Info.plist */,
-				2F85326AF69087F5E0CF9EA6 /* NeoTunnel.entitlements */,
-				BA23E67B42E7E44A3A3E815A /* neo_ffi.swift */,
-				D772E0DA7F48F11613C25468 /* libneo_ffi.a */,
-			);
-			path = NeoTunnel;
-			sourceTree = "<group>";
-		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -154,13 +146,14 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				663A078E3002698800E3B6AA /* NeoMac-iOS.entitlements */,
 				5142014A2437B4B30078DB4F /* NeoMac-macOS */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				1F225151085A85D456236C58 /* PrivacyInfo.xcprivacy */,
 				C7189F9AC5C7EC2FE20458DC /* Pods */,
-				797FF8FD661973AF8F5A1301 /* NeoTunnel */,
+				B2BC224F02AA07CE54067C5F /* NeoTunnel */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -177,8 +170,22 @@
 				A0DBEC7FAC237FD49DB5901D /* NeoTunnel.appex */,
 				87127F85CB700E5C9D1F15FA /* NeoTunnel.appex */,
 				20C5957F1877D3FDD7C8173F /* NeoTunnel.appex */,
+				322E197D934B7B7F1EE3E0BA /* NeoTunnel.systemextension */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B2BC224F02AA07CE54067C5F /* NeoTunnel */ = {
+			isa = PBXGroup;
+			children = (
+				E5BDDA359CB2EC3F56703C8E /* main.swift */,
+				384DDADEACFD553874B81A94 /* PacketTunnelProvider.swift */,
+				A1E20CDFDE1C021E8C155CB3 /* Info.plist */,
+				551972753CC348AEA75054BF /* NeoTunnel.entitlements */,
+				314D72D953E438988DDB13D0 /* neo_ffi.swift */,
+				98977C15FA1840511952BD45 /* libneo_ffi.a */,
+			);
+			path = NeoTunnel;
 			sourceTree = "<group>";
 		};
 		C7189F9AC5C7EC2FE20458DC /* Pods */ = {
@@ -232,25 +239,25 @@
 				381D8A6E24576A4E00465D17 /* Bundle React Native code and images */,
 				1A83996AEEF797CAB3662FBF /* [CP] Embed Pods Frameworks */,
 				A196480F7CB1D221C8B8D26B /* [CP] Copy Pods Resources */,
-				BB887141A7EF441503065F3C /* Embed App Extensions */,
+				BB3598689A1EDC86493C5AFB /* Embed System Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				83BDC3FB346D3DECE3395480 /* PBXTargetDependency */,
+				FF2AB7F6FE9492BB2C736D97 /* PBXTargetDependency */,
 			);
 			name = "NeoMac-macOS";
 			productName = NeoMac;
 			productReference = 514201492437B4B30078DB4F /* NeoMac.app */;
 			productType = "com.apple.product-type.application";
 		};
-		857344404E727156CA2ACD53 /* NeoTunnel */ = {
+		DA401E603993ECD9101B9DEB /* NeoTunnel */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CD812C0682D550CD5B01F34A /* Build configuration list for PBXNativeTarget "NeoTunnel" */;
+			buildConfigurationList = ED92E36E8127325D93530415 /* Build configuration list for PBXNativeTarget "NeoTunnel" */;
 			buildPhases = (
-				5F93382B7DC981CFA333B314 /* Sources */,
-				B0B8FC64AF5195A6E35FAA7C /* Frameworks */,
-				96E3AD5716CCB630E82E672D /* Resources */,
+				DE268F5DE662D61BAF8BF732 /* Sources */,
+				236C00652C252ADD4AA85C00 /* Frameworks */,
+				94CC81052C54411B47819863 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -258,8 +265,8 @@
 			);
 			name = NeoTunnel;
 			productName = NeoTunnel;
-			productReference = 20C5957F1877D3FDD7C8173F /* NeoTunnel.appex */;
-			productType = "com.apple.product-type.app-extension";
+			productReference = 322E197D934B7B7F1EE3E0BA /* NeoTunnel.systemextension */;
+			productType = "com.apple.product-type.system-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -275,9 +282,10 @@
 					};
 					514201482437B4B30078DB4F = {
 						CreatedOnToolsVersion = 11.4;
+						DevelopmentTeam = 6P354D3NZY;
 						ProvisioningStyle = Automatic;
 					};
-					857344404E727156CA2ACD53 = {
+					DA401E603993ECD9101B9DEB = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -297,7 +305,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* NeoMac-iOS */,
 				514201482437B4B30078DB4F /* NeoMac-macOS */,
-				857344404E727156CA2ACD53 /* NeoTunnel */,
+				DA401E603993ECD9101B9DEB /* NeoTunnel */,
 			);
 		};
 /* End PBXProject section */
@@ -322,7 +330,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		96E3AD5716CCB630E82E672D /* Resources */ = {
+		94CC81052C54411B47819863 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -451,23 +459,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5F93382B7DC981CFA333B314 /* Sources */ = {
+		DE268F5DE662D61BAF8BF732 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0B217FE7343A26E2038E2B47 /* PacketTunnelProvider.swift in Sources */,
-				9E9469AE817AFE83247AE088 /* neo_ffi.swift in Sources */,
+				1A1FA126D452C688B16F559D /* main.swift in Sources */,
+				AC47069B794A7DC27E81EA18 /* PacketTunnelProvider.swift in Sources */,
+				C1CE107C1C441E4BF10A650C /* neo_ffi.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		83BDC3FB346D3DECE3395480 /* PBXTargetDependency */ = {
+		FF2AB7F6FE9492BB2C736D97 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = NeoTunnel;
-			target = 857344404E727156CA2ACD53 /* NeoTunnel */;
-			targetProxy = 72881F36DAD9621A3A8C2223 /* PBXContainerItemProxy */;
+			target = DA401E603993ECD9101B9DEB /* NeoTunnel */;
+			targetProxy = 75405EEDC4B86B2AF67C9849 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -488,6 +497,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "NeoMac-iOS.entitlements";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6P354D3NZY;
 				ENABLE_BITCODE = NO;
@@ -511,6 +521,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "NeoMac-iOS.entitlements";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6P354D3NZY;
 				INFOPLIST_FILE = "NeoMac-iOS/Info.plist";
@@ -526,32 +537,6 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
-		};
-		3D6B0BF6CD894DE7BC0F4545 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = NeoTunnel/NeoTunnel.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6P354D3NZY;
-				ENABLE_HARDENED_RUNTIME = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NeoTunnel/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"-force_load",
-					"$(PROJECT_DIR)/../native/Libs/libneo_ffi.a",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.NeoMac.NeoTunnel;
-				PRODUCT_NAME = NeoTunnel;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../native/Generated";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
 		};
 		5142015B2437B4B40078DB4F /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -588,6 +573,7 @@
 				CODE_SIGN_ENTITLEMENTS = "NeoMac-macOS/NeoMac.entitlements";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6P354D3NZY;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "NeoMac-macos/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
@@ -600,6 +586,34 @@
 				PRODUCT_NAME = NeoMac;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		522C5BF4469B46C99E51643C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = NeoTunnel/NeoTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NeoTunnel/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-force_load",
+					"$(PROJECT_DIR)/../native/Libs/libneo_ffi.a",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.NeoMac.NeoTunnel;
+				PRODUCT_MODULE_NAME = NeoTunnel;
+				PRODUCT_NAME = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../native/Generated";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = systemextension;
 			};
 			name = Release;
 		};
@@ -721,13 +735,13 @@
 			};
 			name = Release;
 		};
-		87CF086893774D7BB1736BA2 /* Release */ = {
+		FE0065B013B1C4A80FA09102 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = NeoTunnel/NeoTunnel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6P354D3NZY;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = NeoTunnel/Info.plist;
@@ -739,13 +753,15 @@
 					"$(PROJECT_DIR)/../native/Libs/libneo_ffi.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.NeoMac.NeoTunnel;
-				PRODUCT_NAME = NeoTunnel;
+				PRODUCT_MODULE_NAME = NeoTunnel;
+				PRODUCT_NAME = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../native/Generated";
 				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = systemextension;
 			};
-			name = Release;
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -777,11 +793,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CD812C0682D550CD5B01F34A /* Build configuration list for PBXNativeTarget "NeoTunnel" */ = {
+		ED92E36E8127325D93530415 /* Build configuration list for PBXNativeTarget "NeoTunnel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				87CF086893774D7BB1736BA2 /* Release */,
-				3D6B0BF6CD894DE7BC0F4545 /* Debug */,
+				522C5BF4469B46C99E51643C /* Release */,
+				FE0065B013B1C4A80FA09102 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

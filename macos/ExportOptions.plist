@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Export options for a Developer ID (outside the App Store) build.
+     Automatic signing lets Xcode create/refresh the Developer ID profiles that
+     carry the Network Extension entitlement (needs the App IDs to have the
+     Network Extensions capability enabled once in the developer portal). -->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>developer-id</string>
+	<key>teamID</key>
+	<string>6P354D3NZY</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<!-- Notarization is done explicitly by scripts/release.sh (notarytool),
+	     not by the export step. -->
+	<key>destination</key>
+	<string>export</string>
+</dict>
+</plist>

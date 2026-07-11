@@ -84,6 +84,24 @@ class NeoDaemon: RCTEventEmitter {
     return p
   }
 
+  /// Kill leftover `neo` processes from a previous app run (orphaned when the app
+  /// is force-quit or crashes — macOS reparents children to launchd rather than
+  /// killing them). Matched by our binary path so it only touches our own daemon,
+  /// then a short wait so the OS releases the listener port before we re-bind.
+  private func reapOrphans(binPath: String) {
+    let pkill = Process()
+    pkill.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
+    pkill.arguments = ["-f", binPath]  // -f: match against the full argv
+    do {
+      try pkill.run()
+      pkill.waitUntilExit()
+    } catch {
+      return  // pkill unavailable; start() will surface any bind error itself
+    }
+    // pkill exits 0 only when it signalled at least one match — wait only then.
+    if pkill.terminationStatus == 0 { usleep(300_000) }
+  }
+
   private func drainLines(_ handle: FileHandle, remainder: inout Data, stream: String) {
     remainder.append(handle.availableData)
     while let nl = remainder.firstIndex(of: 0x0A) {
@@ -111,6 +129,13 @@ class NeoDaemon: RCTEventEmitter {
         reject("E_NO_BINARY", "no neo binary found — build one with scripts/build-rust.sh or set NEO_BIN", nil)
         return
       }
+
+      // Reap an orphaned neo process from a previous run before (re)starting.
+      // A force-quit or crash leaves the relay child alive holding its listener
+      // port, so a fresh start fails with "Address already in use". We only reach
+      // here when our own tracked process isn't running (checked above), so any
+      // surviving neo process is an orphan and safe to kill.
+      self.reapOrphans(binPath: binPath)
 
       do {
         try FileManager.default.createDirectory(at: NeoCore.dataDir, withIntermediateDirectories: true)

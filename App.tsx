@@ -124,15 +124,26 @@ export default function App(): React.JSX.Element {
   const prevVpnStatus = useRef<VPNStatus>('disconnected');
   const navHeight = useRef(0);
   const controlsHeight = useRef(0);
+  const lastFitHeight = useRef(0);
 
   // Fit the window height to the controls content (nav + cards), so there's no
   // dead space below and the height tracks sections expanding/collapsing.
   const fitWindowHeight = useCallback(() => {
     if (navHeight.current > 0 && controlsHeight.current > 0) {
-      NeoWindow.setContentHeight(
-        navHeight.current + controlsHeight.current,
-        false,
-      ).catch(() => {});
+      // Round to whole points: a fractional content height puts text on
+      // half-pixel boundaries on Retina, which renders blurry until a resize.
+      const h = Math.round(navHeight.current + controlsHeight.current);
+      const last = lastFitHeight.current;
+      // Symmetric dead-band: ignore sub-4px changes in EITHER direction. RN
+      // re-measures the ScrollView content a pixel or two off after each resize;
+      // reacting to that jitter caused an endless wobble (and, when grow-biased,
+      // ratcheted the window taller than the content). Real content changes
+      // (sections toggling, errors appearing) are far larger than the band.
+      if (last !== 0 && Math.abs(h - last) <= 3) {
+        return;
+      }
+      lastFitHeight.current = h;
+      NeoWindow.setContentHeight(h, false).catch(() => {});
     }
   }, []);
 

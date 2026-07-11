@@ -15,19 +15,30 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
-	<string>XPC!</string>
+	<string>SYSX</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSExtension</key>
+	<!-- Required for a network system extension to activate; without it macOS
+	     rejects activation ("…network_extension category require the presence of
+	     the 'NSSystemExtensionUsageDescription' property"). Needed in the
+	     extension's own Info.plist, not just the containing app's. -->
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>Junctus Neo uses a system extension to route your network traffic through the privacy overlay.</string>
+	<key>NetworkExtension</key>
 	<dict>
-		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.networkextension.packet-tunnel</string>
-		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).PacketTunnelProvider</string>
+		<!-- Deliberately NO NEMachServiceName: it forces the mach service name to be
+		     prefixed by an App Group the extension belongs to, but this packet tunnel
+		     has no app group (the Developer ID profile grants none), so setting it
+		     made the NetworkExtension category reject activation ("extension category
+		     returned error"). A packet-tunnel provider is reached via
+		     NETunnelProviderManager (by provider bundle id), so it isn't needed. -->
+		<key>NEProviderClasses</key>
+		<dict>
+			<key>com.apple.networkextension.packet-tunnel</key>
+			<string>$(PRODUCT_MODULE_NAME).PacketTunnelProvider</string>
+		</dict>
 	</dict>
-	<key>RCTNewArchEnabled</key>
-	<true/>
 </dict>
 </plist>
