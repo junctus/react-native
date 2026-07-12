@@ -83,7 +83,7 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
       guard let self else { return }
       if let error {
         log.error("setTunnelNetworkSettings failed: \(error.localizedDescription, privacy: .public)")
-        self.session?.close()
+        self.session?.shutdown()
         self.session = nil
         completionHandler(error)
         return
@@ -101,7 +101,7 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
   ) {
     log.info("stopTunnel: reason \(reason.rawValue)")
     running = false
-    session?.close()
+    session?.shutdown()
     session = nil
     completionHandler()
   }

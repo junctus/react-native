@@ -111,6 +111,9 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
+    // UniFFI-generated Kotlin bindings for the neo Rust core call through JNA.
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

@@ -483,11 +483,6 @@ fileprivate struct FfiConverterData: FfiConverterRustBuffer {
 public protocol NeoTunnelSessionProtocol: AnyObject, Sendable {
     
     /**
-     * Tear down the tunnel and stop its background tasks. Idempotent.
-     */
-    func close() 
-    
-    /**
      * Wait up to `timeout_ms` for inbound packets and return up to `max_packets`
      * of them (to write back to the OS TUN). Returns empty on timeout/close.
      */
@@ -497,6 +492,13 @@ public protocol NeoTunnelSessionProtocol: AnyObject, Sendable {
      * The authenticated Ed25519 key of the peer exit node (32 bytes).
      */
     func peerKey()  -> Data
+    
+    /**
+     * Tear down the tunnel and stop its background tasks. Idempotent.
+     * Named `shutdown` (not `close`) to avoid colliding with the `close()` that
+     * UniFFI generates for `AutoCloseable` in the Kotlin bindings.
+     */
+    func shutdown() 
     
     /**
      * Submit a batch of outbound IP packets (from the OS TUN). Non-blocking;
@@ -563,15 +565,6 @@ open class NeoTunnelSession: NeoTunnelSessionProtocol, @unchecked Sendable {
 
     
     /**
-     * Tear down the tunnel and stop its background tasks. Idempotent.
-     */
-open func close()  {try! rustCall() {
-    uniffi_neo_ffi_fn_method_neotunnelsession_close(self.uniffiClonePointer(),$0
-    )
-}
-}
-    
-    /**
      * Wait up to `timeout_ms` for inbound packets and return up to `max_packets`
      * of them (to write back to the OS TUN). Returns empty on timeout/close.
      */
@@ -592,6 +585,17 @@ open func peerKey() -> Data  {
     uniffi_neo_ffi_fn_method_neotunnelsession_peer_key(self.uniffiClonePointer(),$0
     )
 })
+}
+    
+    /**
+     * Tear down the tunnel and stop its background tasks. Idempotent.
+     * Named `shutdown` (not `close`) to avoid colliding with the `close()` that
+     * UniFFI generates for `AutoCloseable` in the Kotlin bindings.
+     */
+open func shutdown()  {try! rustCall() {
+    uniffi_neo_ffi_fn_method_neotunnelsession_shutdown(self.uniffiClonePointer(),$0
+    )
+}
 }
     
     /**
@@ -670,11 +674,6 @@ public func FfiConverterTypeNeoTunnelSession_lower(_ value: NeoTunnelSession) ->
 public protocol NeoTunnelStackSessionProtocol: AnyObject, Sendable {
     
     /**
-     * Tear down the tunnel and its stack. Idempotent.
-     */
-    func close() 
-    
-    /**
      * Wait up to `timeout_ms` for up to `max_packets` inbound packets.
      */
     func drainInbound(maxPackets: UInt32, timeoutMs: UInt32)  -> [Data]
@@ -683,6 +682,13 @@ public protocol NeoTunnelStackSessionProtocol: AnyObject, Sendable {
      * How many relays the verified snapshot offered (diagnostics).
      */
     func relayCount()  -> UInt32
+    
+    /**
+     * Tear down the tunnel and its stack. Idempotent. Named `shutdown` (not
+     * `close`) to avoid colliding with UniFFI's generated `AutoCloseable.close()`
+     * in the Kotlin bindings.
+     */
+    func shutdown() 
     
     /**
      * Submit a batch of outbound IP packets (from the OS TUN).
@@ -747,15 +753,6 @@ open class NeoTunnelStackSession: NeoTunnelStackSessionProtocol, @unchecked Send
 
     
     /**
-     * Tear down the tunnel and its stack. Idempotent.
-     */
-open func close()  {try! rustCall() {
-    uniffi_neo_ffi_fn_method_neotunnelstacksession_close(self.uniffiClonePointer(),$0
-    )
-}
-}
-    
-    /**
      * Wait up to `timeout_ms` for up to `max_packets` inbound packets.
      */
 open func drainInbound(maxPackets: UInt32, timeoutMs: UInt32) -> [Data]  {
@@ -775,6 +772,17 @@ open func relayCount() -> UInt32  {
     uniffi_neo_ffi_fn_method_neotunnelstacksession_relay_count(self.uniffiClonePointer(),$0
     )
 })
+}
+    
+    /**
+     * Tear down the tunnel and its stack. Idempotent. Named `shutdown` (not
+     * `close`) to avoid colliding with UniFFI's generated `AutoCloseable.close()`
+     * in the Kotlin bindings.
+     */
+open func shutdown()  {try! rustCall() {
+    uniffi_neo_ffi_fn_method_neotunnelstacksession_shutdown(self.uniffiClonePointer(),$0
+    )
+}
 }
     
     /**
@@ -934,8 +942,10 @@ extension NeoPrivacy: Equatable, Hashable {}
 
 
 /**
- * Why a tunnel operation failed. Coarse on purpose — the shell logs `message`
- * and surfaces a connect failure to the OS.
+ * Why a tunnel operation failed. Coarse on purpose — the shell logs `detail`
+ * and surfaces a connect failure to the OS. (The field is `detail`, not
+ * `message`, because a UniFFI error field named `message` collides with
+ * `Throwable.message` in the generated Kotlin.)
  */
 public enum NeoTunnelError: Swift.Error {
 
@@ -948,12 +958,12 @@ public enum NeoTunnelError: Swift.Error {
     /**
      * Dialing the peer or completing the handshake failed.
      */
-    case Connect(message: String
+    case Connect(detail: String
     )
     /**
      * Fetching or verifying the relay snapshot from the mirrors failed.
      */
-    case Discovery(message: String
+    case Discovery(detail: String
     )
     /**
      * The session has been closed.
@@ -977,10 +987,10 @@ public struct FfiConverterTypeNeoTunnelError: FfiConverterRustBuffer {
         
         case 1: return .Identity
         case 2: return .Connect(
-            message: try FfiConverterString.read(from: &buf)
+            detail: try FfiConverterString.read(from: &buf)
             )
         case 3: return .Discovery(
-            message: try FfiConverterString.read(from: &buf)
+            detail: try FfiConverterString.read(from: &buf)
             )
         case 4: return .Closed
 
@@ -999,14 +1009,14 @@ public struct FfiConverterTypeNeoTunnelError: FfiConverterRustBuffer {
             writeInt(&buf, Int32(1))
         
         
-        case let .Connect(message):
+        case let .Connect(detail):
             writeInt(&buf, Int32(2))
-            FfiConverterString.write(message, into: &buf)
+            FfiConverterString.write(detail, into: &buf)
             
         
-        case let .Discovery(message):
+        case let .Discovery(detail):
             writeInt(&buf, Int32(3))
-            FfiConverterString.write(message, into: &buf)
+            FfiConverterString.write(detail, into: &buf)
             
         
         case .Closed:
@@ -1200,25 +1210,25 @@ private let initializationResult: InitializationResult = {
     if (uniffi_neo_ffi_checksum_func_tunnel_stack_connect() != 44401) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_neo_ffi_checksum_method_neotunnelsession_close() != 2975) {
-        return InitializationResult.apiChecksumMismatch
-    }
     if (uniffi_neo_ffi_checksum_method_neotunnelsession_drain_inbound() != 32328) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_neo_ffi_checksum_method_neotunnelsession_peer_key() != 13505) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_neo_ffi_checksum_method_neotunnelsession_submit_outbound() != 3953) {
+    if (uniffi_neo_ffi_checksum_method_neotunnelsession_shutdown() != 64492) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_neo_ffi_checksum_method_neotunnelstacksession_close() != 39291) {
+    if (uniffi_neo_ffi_checksum_method_neotunnelsession_submit_outbound() != 3953) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_neo_ffi_checksum_method_neotunnelstacksession_drain_inbound() != 60802) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_neo_ffi_checksum_method_neotunnelstacksession_relay_count() != 12760) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_neo_ffi_checksum_method_neotunnelstacksession_shutdown() != 47910) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_neo_ffi_checksum_method_neotunnelstacksession_submit_outbound() != 2138) {

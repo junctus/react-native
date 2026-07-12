@@ -67,14 +67,20 @@ interface NeoDaemonModule {
 }
 
 export const NeoCore: NeoCoreModule = NativeModules.NeoCore;
-export const NeoDaemon: NeoDaemonModule = NativeModules.NeoDaemon;
 
-export const neoEvents = new NativeEventEmitter(NativeModules.NeoDaemon);
+// NeoDaemon (the bundled `neo` CLI) is macOS-only — there's no such module on
+// Android. `hasDaemon` lets the shared UI hide the relay + diagnostics features
+// there, and the subscriptions below no-op instead of crashing.
+export const NeoDaemon: NeoDaemonModule | undefined = NativeModules.NeoDaemon;
+export const hasDaemon = !!NeoDaemon;
+
+const noopSub = {remove() {}};
+const neoEvents = NeoDaemon ? new NativeEventEmitter(NativeModules.NeoDaemon) : null;
 
 export function onLog(handler: (e: LogEvent) => void) {
-  return neoEvents.addListener('neo-log', handler);
+  return neoEvents ? neoEvents.addListener('neo-log', handler) : noopSub;
 }
 
 export function onState(handler: (e: StateEvent) => void) {
-  return neoEvents.addListener('neo-state', handler);
+  return neoEvents ? neoEvents.addListener('neo-state', handler) : noopSub;
 }

@@ -14,6 +14,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,7 +23,12 @@ import {
   View,
 } from 'react-native';
 
+// On a phone the desktop's side-by-side controls+log won't fit, so Android
+// splits them into tabs; macOS keeps the split layout.
+const IS_ANDROID = Platform.OS === 'android';
+
 import {
+  hasDaemon,
   IdentityInfo,
   NeoCore,
   NeoDaemon,
@@ -166,6 +172,7 @@ export default function App(): React.JSX.Element {
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [diagOpen, setDiagOpen] = useState(false);
   const [advOpen, setAdvOpen] = useState(false);
+  const [tab, setTab] = useState<'controls' | 'log'>('controls');
   const logScroll = useRef<ScrollView>(null);
   // A ref (not a module global) so the id counter survives Fast Refresh — a
   // reset while `logs` state persists would mint duplicate React keys.
@@ -220,6 +227,9 @@ export default function App(): React.JSX.Element {
   // Prefill mirrors + witness keys from the core's baked-in defaults, so the app
   // is one-click and shows exactly what it trusts (no trust-on-first-use).
   useEffect(() => {
+    if (!NeoDaemon) {
+      return;
+    }
     NeoDaemon.exec(['defaults'], {timeoutMs: 10_000})
       .then(res => {
         if (res.code !== 0) {
@@ -245,7 +255,7 @@ export default function App(): React.JSX.Element {
       .then(s => setVpnStatus(s.status))
       .catch(() => {});
 
-    NeoDaemon.status()
+    NeoDaemon?.status()
       .then(s => setRelayRunning(s.running))
       .catch(() => {});
 
@@ -283,7 +293,7 @@ export default function App(): React.JSX.Element {
       prev === 'connected' ||
       prev === 'reasserting' ||
       prev === 'disconnecting';
-    if (settledDown && wasActive && relayRunning) {
+    if (settledDown && wasActive && relayRunning && NeoDaemon) {
       NeoDaemon.stop()
         .then(() => appendLog('app', 'relay stopped (tunnel down)'))
         .catch(() => {});
@@ -347,7 +357,7 @@ export default function App(): React.JSX.Element {
     // Start the relay first so it binds and registers before the tunnel
     // captures the default route. A relay failure doesn't block the tunnel.
     let startedRelay = false;
-    if (relayEnabled && !relayRunning) {
+    if (NeoDaemon && relayEnabled && !relayRunning) {
       try {
         const extraArgs = ['--relay'];
         if (relayExit) {
@@ -386,7 +396,7 @@ export default function App(): React.JSX.Element {
       appendLog('vpn', `connect failed: ${msg}`);
       // The tunnel never started, so don't leave the relay we just spawned
       // running (it would hold its port and collide with the next attempt).
-      if (startedRelay) {
+      if (startedRelay && NeoDaemon) {
         await NeoDaemon.stop().catch(() => {});
       }
     }
@@ -409,13 +419,15 @@ export default function App(): React.JSX.Element {
     }
     // Always stop the relay too. stop() is idempotent, so this is robust even if
     // our relayRunning state is stale (e.g. the relay was started in a prior run).
-    try {
-      const res = await NeoDaemon.stop();
-      if (res.stopped) {
-        appendLog('app', 'relay stopped');
+    if (NeoDaemon) {
+      try {
+        const res = await NeoDaemon.stop();
+        if (res.stopped) {
+          appendLog('app', 'relay stopped');
+        }
+      } catch (e: any) {
+        appendLog('app', `relay stop failed: ${e?.message ?? e}`);
       }
-    } catch (e: any) {
-      appendLog('app', `relay stop failed: ${e?.message ?? e}`);
     }
   }, [appendLog]);
 
@@ -451,6 +463,9 @@ export default function App(): React.JSX.Element {
 
   const runOneShot = useCallback(
     async (label: string, args: string[]) => {
+      if (!NeoDaemon) {
+        return;
+      }
       setBusy(label);
       // The bundled CLI has no baked-in witness keys, so pass ours along.
       try {
@@ -516,10 +531,18 @@ export default function App(): React.JSX.Element {
         />
       </View>
 
-      <View style={styles.body}>
-        {/* left column: controls */}
+      {IS_ANDROID && (
+        <View style={styles.tabBar}>
+          <TabButton label="neo" active={tab === 'controls'} onPress={() => setTab('controls')} />
+          <TabButton label="log" active={tab === 'log'} onPress={() => setTab('log')} />
+        </View>
+      )}
+
+      <View style={IS_ANDROID ? styles.bodyCol : styles.body}>
+        {/* controls */}
+        {(!IS_ANDROID || tab === 'controls') && (
         <ScrollView
-          style={styles.controls}
+          style={[styles.controls, IS_ANDROID && styles.panelFull]}
           contentContainerStyle={styles.controlsInner}
           onContentSizeChange={(_w, h) => {
             controlsHeight.current = h;
@@ -549,23 +572,27 @@ export default function App(): React.JSX.Element {
               onChange={setPrivacy}
               disabled={vpnConnected || vpnBusy}
             />
-            <View style={styles.gap} />
-            <View style={styles.rowBetween}>
-              <Check
-                label="relay node"
-                value={relayEnabled}
-                onChange={setRelayEnabled}
-                disabled={vpnConnected || vpnBusy || relayRunning}
-              />
-              <Check
-                label="offer clearnet exit"
-                value={relayExit}
-                onChange={setRelayExit}
-                disabled={
-                  !relayEnabled || vpnConnected || vpnBusy || relayRunning
-                }
-              />
-            </View>
+            {hasDaemon && (
+              <>
+                <View style={styles.gap} />
+                <View style={styles.rowBetween}>
+                  <Check
+                    label="relay node"
+                    value={relayEnabled}
+                    onChange={setRelayEnabled}
+                    disabled={vpnConnected || vpnBusy || relayRunning}
+                  />
+                  <Check
+                    label="offer clearnet exit"
+                    value={relayExit}
+                    onChange={setRelayExit}
+                    disabled={
+                      !relayEnabled || vpnConnected || vpnBusy || relayRunning
+                    }
+                  />
+                </View>
+              </>
+            )}
             <View style={styles.gap} />
             <Button
               wide
@@ -632,6 +659,7 @@ export default function App(): React.JSX.Element {
             )}
           </Card>
 
+          {hasDaemon && (
           <Card
             no="03"
             title="diagnostics"
@@ -670,13 +698,16 @@ export default function App(): React.JSX.Element {
               />
             </View>
           </Card>
+          )}
 
         </ScrollView>
+        )}
 
-        {/* right column: live log pane, always visible */}
-        <View style={styles.logPane}>
+        {/* live log pane */}
+        {(!IS_ANDROID || tab === 'log') && (
+        <View style={[styles.logPane, IS_ANDROID && styles.logPaneAndroid]}>
           <View style={styles.logHead}>
-            <Text style={styles.cardNo}>04</Text>
+            {!IS_ANDROID && <Text style={styles.cardNo}>04</Text>}
             <Text style={styles.cardTitle}>log</Text>
             <View style={styles.flex} />
             <Pressable onPress={() => setLogs([])} hitSlop={6}>
@@ -704,8 +735,26 @@ export default function App(): React.JSX.Element {
             )}
           </ScrollView>
         </View>
+        )}
       </View>
     </View>
+  );
+}
+
+function TabButton({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable style={styles.tab} onPress={onPress}>
+      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+      <View style={[styles.tabRule, active && styles.tabRuleActive]} />
+    </Pressable>
   );
 }
 
@@ -1019,9 +1068,31 @@ const styles = StyleSheet.create({
   },
 
   body: {flex: 1, flexDirection: 'row'},
+  bodyCol: {flex: 1, flexDirection: 'column'},
+
+  // Android tab bar
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: C.rule,
+    backgroundColor: C.bg,
+  },
+  tab: {flex: 1, alignItems: 'center', paddingTop: 10},
+  tabText: {
+    color: C.txFaint,
+    fontFamily: MONO,
+    fontSize: 12,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+    paddingBottom: 8,
+  },
+  tabTextActive: {color: C.accent},
+  tabRule: {height: 2, alignSelf: 'stretch', backgroundColor: 'transparent'},
+  tabRuleActive: {backgroundColor: C.accent},
 
   // left controls column
   controls: {width: CONTROLS_W, flexGrow: 0},
+  panelFull: {width: '100%', flexGrow: 1},
   controlsInner: {padding: 16},
 
   card: {
@@ -1261,6 +1332,7 @@ const styles = StyleSheet.create({
   },
 
   // log pane
+  logPaneAndroid: {marginLeft: 16},
   logPane: {
     flex: 1,
     margin: 16,

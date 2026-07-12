@@ -78,3 +78,6 @@ yarn-error.log
 native/Libs/*.a
 native/Bin/neo
 rust/uniffi-bindgen/target/
+
+# Android Rust core artifacts (rebuild with scripts/build-android-rust.sh)
+android/app/src/main/jniLibs/

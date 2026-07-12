@@ -261,11 +261,6 @@ void*_Nonnull uniffi_neo_ffi_fn_clone_neotunnelsession(void*_Nonnull ptr, RustCa
 void uniffi_neo_ffi_fn_free_neotunnelsession(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
-#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_CLOSE
-#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_CLOSE
-void uniffi_neo_ffi_fn_method_neotunnelsession_close(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
-);
-#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_DRAIN_INBOUND
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_DRAIN_INBOUND
 RustBuffer uniffi_neo_ffi_fn_method_neotunnelsession_drain_inbound(void*_Nonnull ptr, uint32_t max_packets, uint32_t timeout_ms, RustCallStatus *_Nonnull out_status
@@ -274,6 +269,11 @@ RustBuffer uniffi_neo_ffi_fn_method_neotunnelsession_drain_inbound(void*_Nonnull
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_PEER_KEY
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_PEER_KEY
 RustBuffer uniffi_neo_ffi_fn_method_neotunnelsession_peer_key(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_SHUTDOWN
+#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_SHUTDOWN
+void uniffi_neo_ffi_fn_method_neotunnelsession_shutdown(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSESSION_SUBMIT_OUTBOUND
@@ -291,11 +291,6 @@ void*_Nonnull uniffi_neo_ffi_fn_clone_neotunnelstacksession(void*_Nonnull ptr, R
 void uniffi_neo_ffi_fn_free_neotunnelstacksession(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
-#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_CLOSE
-#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_CLOSE
-void uniffi_neo_ffi_fn_method_neotunnelstacksession_close(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
-);
-#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_DRAIN_INBOUND
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_DRAIN_INBOUND
 RustBuffer uniffi_neo_ffi_fn_method_neotunnelstacksession_drain_inbound(void*_Nonnull ptr, uint32_t max_packets, uint32_t timeout_ms, RustCallStatus *_Nonnull out_status
@@ -304,6 +299,11 @@ RustBuffer uniffi_neo_ffi_fn_method_neotunnelstacksession_drain_inbound(void*_No
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_RELAY_COUNT
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_RELAY_COUNT
 uint32_t uniffi_neo_ffi_fn_method_neotunnelstacksession_relay_count(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_SHUTDOWN
+#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_SHUTDOWN
+void uniffi_neo_ffi_fn_method_neotunnelstacksession_shutdown(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_FN_METHOD_NEOTUNNELSTACKSESSION_SUBMIT_OUTBOUND
@@ -636,12 +636,6 @@ uint16_t uniffi_neo_ffi_checksum_func_tunnel_stack_connect(void
     
 );
 #endif
-#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_CLOSE
-#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_CLOSE
-uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_close(void
-    
-);
-#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_DRAIN_INBOUND
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_DRAIN_INBOUND
 uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_drain_inbound(void
@@ -654,15 +648,15 @@ uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_peer_key(void
     
 );
 #endif
-#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SUBMIT_OUTBOUND
-#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SUBMIT_OUTBOUND
-uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_submit_outbound(void
+#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SHUTDOWN
+#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SHUTDOWN
+uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_shutdown(void
     
 );
 #endif
-#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_CLOSE
-#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_CLOSE
-uint16_t uniffi_neo_ffi_checksum_method_neotunnelstacksession_close(void
+#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SUBMIT_OUTBOUND
+#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSESSION_SUBMIT_OUTBOUND
+uint16_t uniffi_neo_ffi_checksum_method_neotunnelsession_submit_outbound(void
     
 );
 #endif
@@ -675,6 +669,12 @@ uint16_t uniffi_neo_ffi_checksum_method_neotunnelstacksession_drain_inbound(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_RELAY_COUNT
 #define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_RELAY_COUNT
 uint16_t uniffi_neo_ffi_checksum_method_neotunnelstacksession_relay_count(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_SHUTDOWN
+#define UNIFFI_FFIDEF_UNIFFI_NEO_FFI_CHECKSUM_METHOD_NEOTUNNELSTACKSESSION_SHUTDOWN
+uint16_t uniffi_neo_ffi_checksum_method_neotunnelstacksession_shutdown(void
     
 );
 #endif
